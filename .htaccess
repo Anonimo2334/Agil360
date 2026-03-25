@@ -1,0 +1,7 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Redirigir todo al directorio public de Laravel
+    RewriteCond %{REQUEST_URI} !^/Agil360/public
+    RewriteRule ^(.*)$ /Agil360/public/$1 [L,R=301]
+</IfModule>

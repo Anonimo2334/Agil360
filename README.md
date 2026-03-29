@@ -1,56 +1,65 @@
-# TailAdmin Laravel - Tailwind CSS Free Laravel Dashboard
+# Agil365 — Sistema de Gestión de Proyectos Tecnológicos
 
-**TailAdmin Laravel** is a modern, production-ready admin dashboard template powered by **Laravel 12**, **Tailwind CSS v4**, **Alpine.js**, and a clean, modular architecture. TailAdmin is one of the most popular Tailwind CSS dashboard now also available for Larvael. It’s designed for building fast, scalable admin panels, CRM dashboards, SaaS backends, and any data-driven application where clarity and performance matter.
-![TailAdmin - Next.js Dashboard Preview](./tailadmin-laravel.png)
+<p align="center">
+  <img src="./public/favicon.png" alt="Agil365 Logo" width="120"/>
+</p>
 
+<p align="center">
+  <strong>Plataforma integral para la gestión ágil de proyectos, equipos, reuniones y tareas.</strong><br>
+  Construida con Laravel 12, Tailwind CSS v4, Alpine.js y MySQL.
+</p>
 
-## Quick Links
+---
 
-* [✨ Get TailAdmin Laravel](https://tailadmin.com/laravel)
-* [📄 Documentation](https://tailadmin.com/docs)
-* [⬇️ Download](https://tailadmin.com/download)
-* [🌐 Live Demo](https://laravel-demo.tailadmin.com)
+## 📌 Descripción
 
-Here’s a tighter, more search-friendly version that highlights value and avoids fluff while keeping your structure intact.
+**Agil365** es un sistema de gestión de proyectos tecnológicos diseñado para equipos de desarrollo e ingeniería. Centraliza la administración de proyectos, clientes, tareas, reuniones, bonos, alertas y reportes en una sola plataforma moderna y responsiva.
 
-## ✨ Key Features
+El sistema implementa un robusto control de roles y permisos, integración con **Google Calendar**, auditoría de actividad, y un dashboard analítico con indicadores clave de rendimiento (KPIs).
 
-* 🚀 **Laravel 12 Core** - Built on the latest Laravel release with improved routing, security, and Blade templating
-* 🎨 **Tailwind CSS v4** - Utility-first styling for rapid, consistent UI development
-* ⚡ **Alpine.js Interactivity** - Lightweight reactivity without a heavy JavaScript framework
-* 📦 **Vite Build System** - Fast dev server, instant HMR, and optimized production builds
-* 📱 **Fully Responsive Layouts** - Smooth, mobile-first design that adapts across all screen sizes
-* 🌙 **Built-in Dark Mode** - Ready-to-use modern dark theme for better usability and aesthetics
-* 📊 **Advanced UI Components** - Charts, data tables, forms, calendars, modals, and reusable blocks for complex dashboards
-* 🎯 **Production-Ready Dashboard UI** - Clean, modern interface crafted for real apps, not placeholder demos
+---
 
-### Other Versions
+## ✨ Características Principales
 
-- [Next.js Version](https://github.com/TailAdmin/free-nextjs-admin-dashboard)
-- [React.js Version](https://github.com/TailAdmin/free-react-tailwind-admin-dashboard)
-- [Vue.js Version](https://github.com/TailAdmin/vue-tailwind-admin-dashboard)
-- [Angular Version](https://github.com/TailAdmin/free-angular-tailwind-dashboard)
-- [Laravel Version](https://github.com/TailAdmin/tailadmin-laravel)
+- 📊 **Dashboard Analítico** — KPIs en tiempo real: proyectos activos, tareas pendientes, reuniones próximas, bonos y alertas
+- 🗂️ **Gestión de Proyectos** — Ciclo de vida completo: creación, seguimiento, notas, estados y cierre
+- ✅ **Gestión de Tareas** — Asignación por proyecto, prioridades, estados y seguimiento por ingeniero
+- 📅 **Reuniones con Agenda** — Programación de reuniones, gestión de participantes, logs de cambios y sincronización con Google Calendar
+- ⏳ **Ítems Pendientes** — Registro y resolución de pendientes por proyecto y responsable
+- 🏆 **Gestión de Bonos** — Control de bonificaciones por empleado y período
+- 🔔 **Alertas del Sistema** — Notificaciones internas configurables por tipo y prioridad
+- 🏢 **Gestión de Clientes** — CRUD de empresas/clientes vinculados a proyectos
+- 👥 **Usuarios y Roles** — Sistema de roles granular con permisos por módulo
+- 📈 **Reportes** — Generación de reportes por proyecto, tarea, usuario y período
+- ⚙️ **Configuración** — Ajustes globales del sistema (logotipo, firma, sello, datos de empresa)
+- 🔗 **Integración Google Calendar** — OAuth 2.0 para sincronización automática de reuniones
+- 🌙 **Modo Oscuro / Claro** — Tema persistente por preferencia del usuario
 
-## 📋 Requirements
-To set up TailAdmin Laravel, make sure your environment includes:
+---
 
-* **PHP 8.2+**
-* **Composer** (PHP dependency manager)
-* **Node.js 18+** and **npm** (for compiling frontend assets)
-* **Database** - Works with SQLite (default), MySQL, or PostgreSQL
+## 🛠️ Stack Tecnológico
 
-### Tailwind CSS Laravel Dashboard
+| Capa | Tecnología |
+|---|---|
+| Backend | Laravel 12 (PHP 8.2+) |
+| Frontend | Tailwind CSS v4, Alpine.js |
+| Build | Vite |
+| Base de Datos | MySQL |
+| Autenticación | Laravel Auth nativo |
+| Integración externa | Google Calendar API v3 (`google/apiclient`) |
+| Testing | PestPHP |
 
-TailAdmin delivers a refined Tailwind CSS Laravel Dashboard experience, combining Laravel’s robust backend with Tailwind’s flexible utility classes. The result is a clean, fast, and customizable dashboard that helps developers build modern admin interfaces without the usual front-end complexity. It’s ideal for teams looking for a Tailwind-powered Laravel starter that stays lightweight and easy to scale.
+---
 
-### Laravel Admin Dashboard
+## 📋 Requisitos del Sistema
 
-If you’re searching for a dependable Laravel Admin Dashboard template that’s easy to set up and ready for production, TailAdmin fits the job. It offers a polished UI, reusable components, optimized performance, and all the essentials needed to launch dashboards, CRM systems, and internal tools quickly. It gives developers a solid foundation, so projects move faster with fewer decisions to worry about.
+- **PHP** 8.2 o superior
+- **Composer** (gestor de dependencias PHP)
+- **Node.js** 18+ y **npm**
+- **MySQL** 5.7+ (se usa XAMPP en desarrollo local)
+- Extensiones PHP requeridas: `pdo_mysql`, `gd`, `zip`, `openssl`, `mbstring`
 
-### Check Your Environment
-
-Verify your installations:
+### Verificar instalaciones
 
 ```bash
 php -v
@@ -59,379 +68,322 @@ node -v
 npm -v
 ```
 
-## 🚀 Quick Start Installation
+---
 
-### Step 1: Clone the Repository
+## 🚀 Instalación
+
+### 1. Clonar el repositorio
 
 ```bash
-git clone https://github.com/TailAdmin/tailadmin-laravel.git
-cd tailadmin-laravel
+git clone https://github.com/Anonimo2334/Agil360.git
+cd Agil360
 ```
 
-### Step 2: Install PHP Dependencies
+### 2. Instalar dependencias PHP
 
 ```bash
 composer install
 ```
 
-This command will install all Laravel dependencies defined in `composer.json`.
-
-### Step 3: Install Node.js Dependencies
+### 3. Instalar dependencias Node.js
 
 ```bash
 npm install
 ```
 
-Or if you prefer yarn or pnpm:
+### 4. Configurar el entorno
 
 ```bash
-# Using yarn
-yarn install
-
-# Using pnpm
-pnpm install
-```
-
-### Step 4: Environment Configuration
-
-Copy the example environment file:
-
-```bash
+# Linux / Mac
 cp .env.example .env
-```
 
-**For Windows users:**
-
-```bash
+# Windows
 copy .env.example .env
 ```
 
-**Or create it programmatically:**
-
-```bash
-php -r "file_exists('.env') || copy('.env.example', '.env');"
-```
-
-### Step 5: Generate Application Key
+### 5. Generar la clave de aplicación
 
 ```bash
 php artisan key:generate
 ```
 
-This creates a unique encryption key for your application.
+### 6. Configurar la base de datos
 
-### Step 6: Configure Database
-
-#### Option A: Using MySQL/PostgreSQL
-
-Update your `.env` file with your database credentials:
+Edita el archivo `.env` con tus credenciales:
 
 ```env
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=tailadmin_db
-DB_USERNAME=your_username
-DB_PASSWORD=your_password
+DB_DATABASE=agil365
+DB_USERNAME=root
+DB_PASSWORD=
 ```
 
-Create the database:
+Crea la base de datos en MySQL:
 
-```bash
-# MySQL
-mysql -u root -p -e "CREATE DATABASE tailadmin_db;"
-
-# PostgreSQL
-createdb tailadmin_db
+```sql
+CREATE DATABASE agil365;
 ```
 
-Run migrations:
+### 7. Ejecutar migraciones
 
 ```bash
 php artisan migrate
 ```
 
-### Step 7: (Optional) Seed the Database
-
-If you want sample data:
+### 8. Poblar la base de datos (Seeders)
 
 ```bash
 php artisan db:seed
 ```
 
-#### Roles y Credenciales de Entrada
-
-Al ejecutar el seeder (`php artisan db:seed`), se crearán los siguientes roles en el sistema:
-- **Super Administrador** (`super_admin`): Acceso total al sistema
-- **Administrador** (`admin`): Gestión del sistema
-- **Gerente** (`gerente`): Gerencia operativa
-- **Ingeniero** (`ingeniero`): Desarrollador / Técnico
-- **Soporte** (`soporte`): Soporte técnico
-- **Visualizador** (`visualizador`): Solo lectura
-
-**Usuarios por Defecto (Credenciales)**
-
-- **Super Administrador:** Email: `admin@agil365.com` / Contraseña: `password`
-- **Ingenieros:** Emails: `ana@agil365.com`, `carlos@agil365.com`, `maria@agil365.com`, `luis@agil365.com`, `pedro@agil365.com` / Contraseña: `password`
-- **Soporte:** Email: `sara@agil365.com` / Contraseña: `password`
-
-### Step 8: Storage Link
-
-Create a symbolic link for file storage:
+### 9. Crear enlace simbólico de almacenamiento
 
 ```bash
 php artisan storage:link
 ```
 
-## 🏃 Running the Application
+---
 
-### Development Mode (Recommended)
+## 👤 Roles y Credenciales por Defecto
 
-The easiest way to start development is using the built-in script:
+Al ejecutar `php artisan db:seed`, se crean los siguientes usuarios y roles:
+
+| Rol | Descripción | Email | Contraseña |
+|---|---|---|---|
+| `super_admin` | Acceso total al sistema | `admin@agil365.com` | `password` |
+| `ingeniero` | Desarrollador / Técnico | `ana@agil365.com` | `password` |
+| `ingeniero` | Desarrollador / Técnico | `carlos@agil365.com` | `password` |
+| `ingeniero` | Desarrollador / Técnico | `maria@agil365.com` | `password` |
+| `ingeniero` | Desarrollador / Técnico | `luis@agil365.com` | `password` |
+| `ingeniero` | Desarrollador / Técnico | `pedro@agil365.com` | `password` |
+| `soporte` | Soporte técnico | `sara@agil365.com` | `password` |
+
+**Roles disponibles en el sistema:**
+
+- `super_admin` — Control total
+- `admin` — Gestión administrativa
+- `gerente` — Gerencia operativa
+- `ingeniero` — Desarrollador / Técnico
+- `soporte` — Soporte técnico
+- `visualizador` — Solo lectura
+
+---
+
+## ▶️ Ejecutar la Aplicación
+
+### Con XAMPP (recomendado en desarrollo)
+
+1. Inicia **Apache** y **MySQL** desde el panel de XAMPP
+2. Accede en el navegador: [http://localhost/Agil360/public](http://localhost/Agil360/public)
+3. Compila los assets en modo desarrollo:
+
+```bash
+npm run dev
+```
+
+### Con servidor artisan
+
+```bash
+# Terminal 1 — Servidor PHP
+php artisan serve
+
+# Terminal 2 — Assets en tiempo real
+npm run dev
+```
+
+O todo junto con:
 
 ```bash
 composer run dev
 ```
 
-This single command starts:
-- ✅ Laravel development server (http://localhost:8000)
-- ✅ Vite dev server for hot module reloading
-- ✅ Queue worker for background jobs
-- ✅ Log monitoring
+**URL:** [http://localhost:8000](http://localhost:8000)
 
-**Access your application at:** [http://localhost:8000](http://localhost:8000)
-
-### Manual Development Setup
-
-If you prefer to run services individually in separate terminal windows:
-
-**Terminal 1 - Laravel Server:**
-```bash
-php artisan serve
-```
-
-**Terminal 2 - Frontend Assets:**
-```bash
-npm run dev
-```
-
-### Building for Production
-
-#### Build Frontend Assets
+### Build para producción
 
 ```bash
 npm run build
-```
-
-#### Optimize Laravel
-
-```bash
-# Clear and cache configuration
 php artisan config:cache
-
-# Cache routes
 php artisan route:cache
-
-# Cache views
 php artisan view:cache
-
-# Optimize autoloader
 composer install --optimize-autoloader --no-dev
 ```
 
-#### Production Environment
+---
 
-Update your `.env` for production:
+## 🔗 Integración Google Calendar
+
+Agil365 permite sincronizar reuniones con Google Calendar vía OAuth 2.0.
+
+### Configuración en `.env`
 
 ```env
-APP_ENV=production
-APP_DEBUG=false
-APP_URL=https://yourdomain.com
+GOOGLE_CLIENT_ID=tu_client_id
+GOOGLE_CLIENT_SECRET=tu_client_secret
+GOOGLE_REDIRECT_URI=http://localhost/Agil360/public/google-calendar/callback
 ```
 
+### Pasos:
+1. Crear un proyecto en [Google Cloud Console](https://console.cloud.google.com/)
+2. Habilitar la **Google Calendar API**
+3. Crear credenciales OAuth 2.0 (tipo: Aplicación web)
+4. Agregar la URI de redirección autorizada
+5. Copiar el Client ID y Client Secret al `.env`
+
+---
+
+## 📁 Estructura del Proyecto
+
+```
+Agil360/
+├── app/
+│   ├── Http/
+│   │   └── Controllers/
+│   │       ├── DashboardController.php
+│   │       ├── ProjectController.php
+│   │       ├── TaskController.php
+│   │       ├── MeetingController.php
+│   │       ├── PendingItemController.php
+│   │       ├── BonusController.php
+│   │       ├── AlertController.php
+│   │       ├── CompanyController.php
+│   │       ├── UserController.php
+│   │       ├── RoleController.php
+│   │       ├── ReportController.php
+│   │       ├── SettingController.php
+│   │       ├── ProfileController.php
+│   │       └── GoogleCalendarController.php
+│   └── Models/
+│       ├── User.php
+│       ├── Project.php
+│       ├── Task.php
+│       ├── Meeting.php
+│       ├── MeetingLog.php
+│       ├── PendingItem.php
+│       ├── Bonus.php
+│       ├── Alert.php
+│       ├── Company.php
+│       ├── Role.php
+│       ├── Setting.php
+│       ├── ActivityLog.php
+│       ├── ProjectNote.php
+│       └── GoogleCalendarIntegration.php
+├── database/
+│   ├── migrations/          # 21 migraciones de la BD
+│   └── seeders/             # Datos iniciales (roles, usuarios)
+├── public/
+│   ├── favicon.png          # Logo del sistema
+│   └── index.php
+├── resources/
+│   ├── css/app.css
+│   ├── js/app.js
+│   └── views/
+│       ├── layouts/         # app.blade.php, sidebar, header
+│       ├── components/      # Componentes reutilizables
+│       └── pages/agil365/
+│           ├── dashboard.blade.php
+│           ├── proyectos/
+│           ├── tareas/
+│           ├── reuniones/
+│           ├── pendientes/
+│           ├── bonos/
+│           ├── alertas/
+│           ├── clientes/
+│           ├── usuarios/
+│           ├── roles.blade.php
+│           ├── reportes/
+│           ├── profile/
+│           ├── account/
+│           └── configuracion.blade.php
+├── routes/
+│   └── web.php
+├── .env.example
+├── composer.json
+├── package.json
+└── vite.config.js
+```
+
+---
 
 ## 🧪 Testing
 
-Run the test suite using Pest:
-
 ```bash
-composer run test
-```
-
-Or manually:
-
-```bash
+# Ejecutar todos los tests
 php artisan test
-```
 
-Run with coverage:
-
-```bash
+# Con cobertura
 php artisan test --coverage
-```
 
-Run specific tests:
-
-```bash
+# Filtrar tests específicos
 php artisan test --filter=ExampleTest
-```
 
-## 📜 Available Commands
-
-### Composer Scripts
-
-```bash
-# Start development environment
-composer run dev
-
-# Run tests
+# Usando Composer
 composer run test
-
-# Code formatting (if configured)
-composer run format
-
-# Static analysis (if configured)
-composer run analyze
 ```
 
-### NPM Scripts
+---
+
+## 📜 Comandos Útiles
 
 ```bash
-# Start Vite dev server
-npm run dev
+# Migraciones
+php artisan migrate                    # Ejecutar migraciones pendientes
+php artisan migrate:fresh --seed       # Resetear BD y poblar con seeders
+php artisan migrate:rollback           # Revertir última migración
 
-# Build for production
-npm run build
+# Caché y optimización
+php artisan optimize:clear             # Limpiar toda la caché
+php artisan optimize                   # Cachear todo para producción
+php artisan config:cache               # Cachear configuración
+php artisan route:cache                # Cachear rutas
 
-# Preview production build
-npm run preview
-
-# Lint JavaScript/TypeScript
-npm run lint
-
-# Format code
-npm run format
+# Utilidades
+php artisan storage:link               # Enlace simbólico de storage
+php artisan route:list                 # Listar todas las rutas
+php artisan queue:work                 # Iniciar worker de colas
+php artisan make:controller MiController  # Crear controlador
+php artisan make:model MiModelo -m    # Crear modelo con migración
 ```
 
-### Artisan Commands
+---
 
-```bash
-# Start development server
-php artisan serve
+## 🐛 Solución de Problemas
 
-# Run migrations
-php artisan migrate
-
-# Rollback migrations
-php artisan migrate:rollback
-
-# Fresh migrations with seeding
-php artisan migrate:fresh --seed
-
-# Generate application key
-php artisan key:generate
-
-# Clear all caches
-php artisan optimize:clear
-
-# Cache everything for production
-php artisan optimize
-
-# Create symbolic link for storage
-php artisan storage:link
-
-# Start queue worker
-php artisan queue:work
-
-# List all routes
-php artisan route:list
-
-# Create a new controller
-php artisan make:controller YourController
-
-# Create a new model
-php artisan make:model YourModel -m
-
-# Create a new migration
-php artisan make:migration create_your_table
-```
-
-## 📁 Project Structure
-
-```
-tailadmin-laravel/
-├── app/                    # Application logic
-│   ├── Http/              # Controllers, Middleware, Requests
-│   ├── Models/            # Eloquent models
-│   └── Providers/         # Service providers
-├── bootstrap/             # Framework bootstrap files
-├── config/                # Configuration files
-├── database/              # Migrations, seeders, factories
-│   ├── migrations/
-│   ├── seeders/
-│   └── factories/
-├── public/                # Public assets (entry point)
-│   ├── build/            # Compiled assets (generated)
-│   └── index.php         # Application entry point
-├── resources/             # Views and raw assets
-│   ├── css/              # Stylesheets (Tailwind)
-│   ├── js/               # JavaScript files (Alpine.js)
-│   └── views/            # Blade templates
-├── routes/                # Route definitions
-│   ├── web.php           # Web routes
-│   ├── api.php           # API routes
-│   └── console.php       # Console routes
-├── storage/               # Logs, cache, uploads
-│   ├── app/
-│   ├── framework/
-│   └── logs/
-├── tests/                 # Pest test files
-│   ├── Feature/
-│   └── Unit/
-├── .env.example           # Example environment file
-├── artisan                # Artisan CLI
-├── composer.json          # PHP dependencies
-├── package.json           # Node dependencies
-├── vite.config.js         # Vite configuration
-└── tailwind.config.js     # Tailwind configuration
-```
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-#### "Class not found" errors
+### Error "Class not found"
 ```bash
 composer dump-autoload
 ```
 
-#### Permission errors on storage/bootstrap/cache
+### Error de permisos en `storage/` o `bootstrap/cache/`
 ```bash
+# Linux/Mac
 chmod -R 775 storage bootstrap/cache
 ```
 
-#### NPM build errors
+### Error al compilar assets
 ```bash
 rm -rf node_modules package-lock.json
 npm install
+npm run dev
 ```
 
-#### Clear all caches
+### Limpiar toda la caché
 ```bash
 php artisan optimize:clear
 ```
 
-#### Database connection errors
-- Check `.env` database credentials
-- Ensure database server is running
-- Verify database exists
+### Error de conexión a la base de datos
+- Verificar que MySQL esté activo en XAMPP
+- Revisar credenciales en `.env`
+- Confirmar que la base de datos `agil365` exista
 
-## 🔄 Update Log
+### El favicon no se actualiza en el navegador
+- Hacer **Ctrl + Shift + R** (recarga forzada) en el navegador
 
-### [2025-12-29]
-- Added Date Picker in Statistics Chart
+---
 
-## License
+## 📄 Licencia
 
-Refer to our [LICENSE](https://tailadmin.com/license) page for more information.
-"# agil_V0.1" 
+Este proyecto es de uso interno. Todos los derechos reservados © 2025 Agil365.

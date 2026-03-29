@@ -129,7 +129,7 @@ class AlertService
         if ($overdueTaskCount > 0) {
             // Update or recreate so the count stays current
             $existing = Alert::where('project_id', $project->id)
-                ->where('type', 'tareas_vencidas')
+                ->where('type', 'tareas_atrasadas')
                 ->where('status', 'activa')
                 ->first();
 
@@ -140,7 +140,7 @@ class AlertService
             } else {
                 Alert::create([
                     'project_id' => $project->id,
-                    'type'       => 'tareas_vencidas',
+                    'type'       => 'tareas_atrasadas',
                     'message'    => $message,
                     'severity'   => 'warning',
                     'status'     => 'activa',
@@ -148,7 +148,7 @@ class AlertService
             }
         } else {
             Alert::where('project_id', $project->id)
-                ->where('type', 'tareas_vencidas')
+                ->where('type', 'tareas_atrasadas')
                 ->where('status', 'activa')
                 ->update(['status' => 'resuelta']);
         }

@@ -46,7 +46,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Calendar init
     if (document.querySelector('#calendar')) {
-        import('./components/calendar-init').then(module => module.calendarInit());
-        import('./components/reuniones-calendar'); // exposes window.ReunionesCalendar
+        const calEl = document.querySelector('#calendar');
+        if (calEl.dataset.reuniones === 'true') {
+            // Reuniones page: only load our custom calendar (exposes window.ReunionesCalendar)
+            import('./components/reuniones-calendar');
+        } else {
+            // Generic calendar pages
+            import('./components/calendar-init').then(module => module.calendarInit());
+        }
     }
 });

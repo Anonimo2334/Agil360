@@ -8,6 +8,10 @@
 
     <title>{{ $title ?? 'Dashboard' }} | Agil365 — Gestión de Proyectos Tecnológicos</title>
 
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
+    <link rel="shortcut icon" type="image/png" href="{{ asset('favicon.png') }}">
+
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 

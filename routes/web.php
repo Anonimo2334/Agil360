@@ -27,6 +27,16 @@ Route::middleware('auth')->group(function () {
     // Dashboard — todos los autenticados pueden verlo
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
 
+    // ─── Mi Perfil & Ajustes ──────────────────────────────────────────────────
+    Route::get('/perfil', [App\Http\Controllers\ProfileController::class, 'index'])->name('profile.index');
+    Route::put('/perfil/actualizar', [App\Http\Controllers\ProfileController::class, 'updateProfile'])->name('profile.update_info');
+    Route::put('/perfil/password', [App\Http\Controllers\ProfileController::class, 'updatePassword'])->name('profile.password');
+
+    // ─── Integración Google Calendar ───────────────────────────────────────────
+    Route::get('/google-calendar/connect', [App\Http\Controllers\GoogleCalendarController::class, 'connect'])->name('google.calendar.connect');
+    Route::get('/google-calendar/callback', [App\Http\Controllers\GoogleCalendarController::class, 'callback'])->name('google.calendar.callback');
+    Route::post('/google-calendar/disconnect', [App\Http\Controllers\GoogleCalendarController::class, 'disconnect'])->name('google.calendar.disconnect');
+
     // ─── Clientes ──────────────────────────────────────────────────────────────
     // Ver: admin, gerente, soporte, visualizador, ingeniero (solo vista)
     Route::get('/clientes', [CompanyController::class, 'index'])
@@ -141,8 +151,17 @@ Route::middleware('auth')->group(function () {
     Route::post('/reuniones', [MeetingController::class, 'store'])
         ->name('reuniones.store')
         ->middleware('permission:tareas.editar');
+    Route::get('/reuniones/logs', [MeetingController::class, 'logs'])
+        ->name('reuniones.logs')
+        ->middleware('permission:tareas.ver');
+    Route::get('/reuniones/{meeting}', [MeetingController::class, 'show'])
+        ->name('reuniones.show')
+        ->middleware('permission:tareas.ver');
     Route::put('/reuniones/{meeting}', [MeetingController::class, 'update'])
         ->name('reuniones.update')
+        ->middleware('permission:tareas.editar');
+    Route::patch('/reuniones/{meeting}/estado', [MeetingController::class, 'updateStatus'])
+        ->name('reuniones.status')
         ->middleware('permission:tareas.editar');
     Route::delete('/reuniones/{meeting}', [MeetingController::class, 'destroy'])
         ->name('reuniones.destroy')

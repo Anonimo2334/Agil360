@@ -70,6 +70,11 @@ class User extends Authenticatable
         return $this->belongsToMany(Meeting::class, 'meeting_participants');
     }
 
+    public function googleCalendarIntegration()
+    {
+        return $this->hasOne(GoogleCalendarIntegration::class);
+    }
+
     // ─── Helpers ────────────────────────────────────────────────────────────────
 
     public function hasRole(string $roleSlug): bool

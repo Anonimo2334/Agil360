@@ -18,6 +18,7 @@ class Meeting extends Model
         'location',
         'status',
         'created_by',
+        'google_event_id',
     ];
 
     protected $casts = [
@@ -37,6 +38,11 @@ class Meeting extends Model
     public function participants()
     {
         return $this->belongsToMany(User::class, 'meeting_participants');
+    }
+
+    public function logs()
+    {
+        return $this->hasMany(MeetingLog::class)->with('user')->latest();
     }
 
     public function getFormattedTimeAttribute(): string

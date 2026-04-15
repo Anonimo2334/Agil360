@@ -209,44 +209,168 @@ class ProjectController extends Controller
             rewind($file);
         }
 
-        $header = fgetcsv($file, 1000, ',');
-        if (!$header || count($header) < 7) {
-            return redirect()->back()->with('error', 'El archivo debe tener 7 columnas separadas por coma.');
-        }
-
         $imported = 0;
         $errors = 0;
+        $mode = 'standard';
+        $headerDetected = false;
 
         while (($row = fgetcsv($file, 1000, ',')) !== false) {
-            if (count($row) < 7) {
-                $errors++;
+            // Check for empty rows
+            if (empty(array_filter($row))) {
+                continue;
+            }
+            
+            // Detect if Agil360 custom format (headers start with ID, Cliente)
+            if (isset($row[2]) && strtolower(trim($row[2])) === 'cliente') {
+                $mode = 'agil360';
+                $headerDetected = true;
+                continue;
+            }
+            
+            // Detect if Standard format
+            if (!$headerDetected && isset($row[1]) && strtolower(trim($row[1])) === 'nombre_proyecto') {
+                $headerDetected = true;
+                continue;
+            }
+            
+            // Skip title/header decorative rows in Agil360 files
+            if (isset($row[1]) && str_contains(strtoupper($row[1]), 'LISTADO')) {
                 continue;
             }
 
-            $company_id = trim($row[0]);
-            $project_name = trim($row[1]);
+            if ($mode === 'agil360') {
+                if (count($row) < 7) {
+                    $errors++;
+                    continue;
+                }
 
-            if (empty($company_id) || empty($project_name)) {
-                $errors++;
-                continue;
-            }
+                $cliente_name = trim($row[2]);
+                if (empty($cliente_name)) {
+                    continue;
+                }
 
-            try {
-                $status = strtolower(trim($row[6]));
-                $validStatuses = ['iniciado','en_proceso','soporte','completado','cancelado'];
+                $estadoStr = strtolower(trim($row[3]));
+                $statusMap = [
+                    'inicio' => 'iniciado',
+                    'en progreso' => 'en_proceso',
+                    'soporte' => 'soporte',
+                    'completado' => 'completado',
+                    'cancelado' => 'cancelado'
+                ];
+                $status = $statusMap[$estadoStr] ?? 'iniciado';
+
+                $avanceStr = trim($row[4]);
+                $avance = (int) preg_replace('/[^0-9]/', '', $avanceStr);
+
+                $start_date = null;
+                if (!empty(trim($row[5])) && strtolower(trim($row[5])) !== 'completado') {
+                    try {
+                        $parts = explode('/', trim($row[5]));
+                        if (count($parts) === 3) {
+                            $start_date = \Carbon\Carbon::createFromFormat('n/j/Y', trim($row[5]))->format('Y-m-d');
+                        }
+                    } catch (\Exception $e) {}
+                }
+
+                $end_date = null;
+                if (!empty(trim($row[6])) && strtolower(trim($row[6])) !== 'completado' && strtolower(trim($row[6])) !== 'enero') {
+                    try {
+                        $parts = explode('/', trim($row[6]));
+                        if (count($parts) === 3) {
+                            $end_date = \Carbon\Carbon::createFromFormat('n/j/Y', trim($row[6]))->format('Y-m-d');
+                        }
+                    } catch (\Exception $e) {}
+                }
+
+                $web = trim($row[7] ?? '');
+                if (strtolower($web) === 'por buscar' || str_contains(strtolower($web), 'comprar') || str_contains(strtolower($web), 'esperamos')) {
+                    $web = null;
+                } elseif (!empty($web) && !str_starts_with($web, 'http')) {
+                    $web = 'https://' . $web;
+                }
                 
-                Project::create([
-                    'company_id'          => $company_id,
-                    'project_name'        => $project_name,
-                    'ceo'                 => trim($row[2]) ?: null,
-                    'start_date'          => trim($row[3]) ?: null,
-                    'end_date'            => trim($row[4]) ?: null,
-                    'progress_percentage' => is_numeric(trim($row[5])) ? (int)trim($row[5]) : 0,
-                    'status'              => in_array($status, $validStatuses) ? $status : 'iniciado',
-                ]);
-                $imported++;
-            } catch (\Exception $e) {
-                $errors++;
+                if ($web && strlen($web) > 255) {
+                    $web = substr($web, 0, 255);
+                }
+
+                $ceo = trim($row[8] ?? '');
+                $notes = trim($row[13] ?? '');
+
+                // Find or create company
+                $company = Company::firstOrCreate(
+                    ['name' => $cliente_name],
+                    [
+                        'contact_name' => substr($ceo, 0, 255),
+                        'website' => $web
+                    ]
+                );
+
+                // Find engineers
+                $primaryEngineerName = trim($row[9] ?? '');
+                $primaryEngineerId = null;
+                if ($primaryEngineerName) {
+                    $eng = User::where('name', 'like', "%{$primaryEngineerName}%")->first();
+                    if ($eng) $primaryEngineerId = $eng->id;
+                }
+
+                $backupEngineerName = trim($row[10] ?? '');
+                $backupEngineerId = null;
+                if ($backupEngineerName) {
+                    $eng = User::where('name', 'like', "%{$backupEngineerName}%")->first();
+                    if ($eng) $backupEngineerId = $eng->id;
+                }
+
+                try {
+                    Project::create([
+                        'company_id'          => $company->id,
+                        'project_name'        => $cliente_name,
+                        'ceo'                 => substr($ceo, 0, 255) ?: null,
+                        'primary_engineer_id' => $primaryEngineerId,
+                        'backup_engineer_id'  => $backupEngineerId,
+                        'start_date'          => $start_date,
+                        'end_date'            => $end_date,
+                        'progress_percentage' => $avance,
+                        'status'              => $status,
+                        'website_url'         => $web,
+                        'notes'               => $notes ?: null,
+                    ]);
+                    $imported++;
+                } catch (\Exception $e) {
+                    $errors++;
+                }
+
+            } else {
+                // Standard format parsing
+                if (count($row) < 7) {
+                    $errors++;
+                    continue;
+                }
+
+                $company_id = trim($row[0]);
+                $project_name = trim($row[1]);
+
+                if (empty($company_id) || empty($project_name)) {
+                    $errors++;
+                    continue;
+                }
+
+                try {
+                    $status = strtolower(trim($row[6]));
+                    $validStatuses = ['iniciado','en_proceso','soporte','completado','cancelado'];
+                    
+                    Project::create([
+                        'company_id'          => $company_id,
+                        'project_name'        => $project_name,
+                        'ceo'                 => trim($row[2]) ?: null,
+                        'start_date'          => trim($row[3]) ?: null,
+                        'end_date'            => trim($row[4]) ?: null,
+                        'progress_percentage' => is_numeric(trim($row[5])) ? (int)trim($row[5]) : 0,
+                        'status'              => in_array($status, $validStatuses) ? $status : 'iniciado',
+                    ]);
+                    $imported++;
+                } catch (\Exception $e) {
+                    $errors++;
+                }
             }
         }
         fclose($file);

@@ -92,4 +92,74 @@ class CompanyController extends Controller
         return redirect()->route('clientes')
             ->with('success', 'Cliente eliminado.');
     }
+
+    /**
+     * API: Quick-create a company from the project form (returns JSON)
+     */
+    public function quickCreate(Request $request)
+    {
+        $request->validate(['name' => 'required|string|max:255']);
+        $company = Company::firstOrCreate(
+            ['name' => trim($request->name)],
+            ['is_active' => true]
+        );
+        return response()->json(['id' => $company->id, 'name' => $company->name]);
+    }
+
+    /**
+     * API: Search companies for autocomplete (returns JSON)
+     */
+    public function search(Request $request)
+    {
+        $q = $request->get('q', '');
+        $companies = Company::where('name', 'like', "%{$q}%")
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->limit(10)
+            ->get(['id', 'name']);
+        return response()->json($companies);
+    }
+
+    /**
+     * Import clients from CSV file
+     */
+    public function importCsv(Request $request)
+    {
+        $request->validate(['csv_file' => 'required|file|mimes:csv,txt|max:5120']);
+
+        $file = fopen($request->file('csv_file')->getRealPath(), 'r');
+        $bom = fread($file, 3);
+        if ($bom !== "\xEF\xBB\xBF") {
+            rewind($file);
+        }
+
+        $imported = 0;
+        $errors   = 0;
+        $header   = null;
+
+        while (($row = fgetcsv($file, 1000, ',')) !== false) {
+            if (empty(array_filter($row))) continue;
+            if (!$header) { $header = $row; continue; }
+
+            $name = trim($row[0] ?? '');
+            if (empty($name)) { $errors++; continue; }
+
+            try {
+                Company::firstOrCreate(['name' => $name], [
+                    'contact_name' => trim($row[1] ?? '') ?: null,
+                    'email'        => trim($row[2] ?? '') ?: null,
+                    'phone'        => trim($row[3] ?? '') ?: null,
+                    'country'      => trim($row[4] ?? '') ?: null,
+                    'is_active'    => true,
+                ]);
+                $imported++;
+            } catch (\Exception $e) {
+                $errors++;
+            }
+        }
+        fclose($file);
+
+        return redirect()->back()->with('success', "Importación completada: {$imported} clientes creados, {$errors} errores.");
+    }
 }
+

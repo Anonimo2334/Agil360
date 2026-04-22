@@ -44,14 +44,14 @@
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Cliente / Empresa *</label>
-                        <select name="company_id" class="w-full px-4 py-2.5 text-sm border {{ $errors->has('company_id') ? 'border-error-400' : 'border-gray-200' }} rounded-xl bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500/20">
-                            <option value="">Seleccionar cliente...</option>
-                            @foreach($companies as $company)
-                                <option value="{{ $company->id }}" {{ old('company_id') == $company->id ? 'selected' : '' }}>
-                                    {{ $company->name }}
-                                </option>
-                            @endforeach
-                        </select>
+                        <div class="relative" id="company-autocomplete">
+                            <input type="text" id="company-search-input" placeholder="Escribe para buscar o crear cliente..."
+                                autocomplete="off"
+                                class="w-full px-4 py-2.5 text-sm border {{ $errors->has('company_id') ? 'border-error-400' : 'border-gray-200' }} rounded-xl bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500/20">
+                            <input type="hidden" name="company_id" id="company-id-hidden" value="{{ old('company_id') }}" required>
+                            <div id="company-dropdown" class="absolute top-full left-0 right-0 z-50 mt-1 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg hidden max-h-52 overflow-y-auto">
+                            </div>
+                        </div>
                         @error('company_id')<p class="text-xs text-error-500 mt-1">{{ $message }}</p>@enderror
                     </div>
                 </div>
@@ -248,6 +248,84 @@ document.querySelector('form').addEventListener('submit', function() {
     const btn = document.getElementById('submitBtn');
     btn.disabled = true;
     btn.innerHTML = '<svg class="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg> Guardando...';
+});
+
+// ─── Company Autocomplete ─────────────────────────────────────────────────────
+const companyInput   = document.getElementById('company-search-input');
+const companyHidden  = document.getElementById('company-id-hidden');
+const companyDropdown = document.getElementById('company-dropdown');
+let companyTimeout;
+
+// Pre-fill if old value exists
+@if(old('company_id'))
+(function() {
+    fetch('/api/clientes/buscar?q=', {headers: {'Accept':'application/json','X-CSRF-TOKEN':'{{ csrf_token() }}'}})
+    .then(r=>r.json())
+    .then(items => {
+        const found = items.find(i => i.id == {{ old('company_id', 0) }});
+        if (found) companyInput.value = found.name;
+    });
+})();
+@endif
+
+companyInput.addEventListener('input', function() {
+    clearTimeout(companyTimeout);
+    const q = this.value.trim();
+    companyHidden.value = ''; // Clear hidden until user selects
+    if (q.length < 1) { companyDropdown.classList.add('hidden'); return; }
+    companyTimeout = setTimeout(() => {
+        fetch(`/api/clientes/buscar?q=${encodeURIComponent(q)}`, {
+            headers: {'Accept': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}'}
+        })
+        .then(r => r.json())
+        .then(items => {
+            let html = items.map(item => `
+                <div class="px-3 py-2.5 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer text-sm text-gray-800 dark:text-gray-200 border-b border-gray-100 dark:border-gray-800 last:border-0"
+                     onclick="selectCompany(${item.id}, '${item.name.replace(/'/g, "\\'")}')">🏢 ${item.name}</div>
+            `).join('');
+            // Add quick-create option
+            html += `
+                <div class="px-3 py-2.5 hover:bg-brand-50 dark:hover:bg-brand-500/10 cursor-pointer text-sm text-brand-600 border-t border-dashed border-gray-200 dark:border-gray-700 dark:text-brand-400 font-medium flex items-center gap-2"
+                     onclick="quickCreateCompany('${q.replace(/'/g, "\\'")}')">➕ Agregar a "${q}"</div>
+            `;
+            companyDropdown.innerHTML = html;
+            companyDropdown.classList.remove('hidden');
+        });
+    }, 200);
+});
+
+function selectCompany(id, name) {
+    companyHidden.value = id;
+    companyInput.value  = name;
+    companyDropdown.classList.add('hidden');
+}
+
+function quickCreateCompany(name) {
+    fetch('/api/clientes/rapido', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json','Accept':'application/json','X-CSRF-TOKEN':'{{ csrf_token() }}'},
+        body: JSON.stringify({name: name})
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.id) {
+            selectCompany(data.id, data.name);
+            // Show a small feedback
+            const feedback = document.createElement('p');
+            feedback.textContent = '✓ Cliente "' + data.name + '" guardado.';
+            feedback.className = 'text-xs text-success-500 mt-1';
+            document.getElementById('company-autocomplete').appendChild(feedback);
+            setTimeout(() => feedback.remove(), 3000);
+        }
+    })
+    .catch(() => alert('Error al crear cliente.'));
+    companyDropdown.classList.add('hidden');
+}
+
+document.addEventListener('click', function(e) {
+    if (!companyInput.contains(e.target) && !companyDropdown.contains(e.target)) {
+        companyDropdown.classList.add('hidden');
+    }
 });
 </script>
 @endpush

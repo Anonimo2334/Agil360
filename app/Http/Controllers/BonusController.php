@@ -58,7 +58,32 @@ class BonusController extends Controller
 
     public function reject(Bonus $bonus)
     {
-        $bonus->update(['status' => 'rechazado']);
+        $request = request();
+        $bonus->update([
+            'status'           => 'rechazado',
+            'rejection_reason' => $request->rejection_reason ?? null,
+        ]);
         return redirect()->back()->with('success', 'Bono rechazado.');
     }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'engineer_id' => 'required|exists:users,id',
+            'project_id'  => 'nullable|exists:projects,id',
+            'amount'      => 'required|numeric|min:1',
+            'reason'      => 'required|string|max:500',
+        ]);
+
+        Bonus::create([
+            'engineer_id' => $request->engineer_id,
+            'project_id'  => $request->project_id,
+            'amount'      => $request->amount,
+            'reason'      => $request->reason,
+            'status'      => 'pendiente',
+        ]);
+
+        return redirect()->back()->with('success', 'Bono registrado manualmente.');
+    }
 }
+

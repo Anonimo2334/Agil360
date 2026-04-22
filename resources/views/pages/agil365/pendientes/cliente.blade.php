@@ -199,14 +199,15 @@
 {{-- MODAL: Nuevo Pendiente Cliente --}}
 <div id="modal-nuevo-pendiente" class="hidden fixed inset-0 z-[999999] flex items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="document.getElementById('modal-nuevo-pendiente').classList.add('hidden')"></div>
-    <div class="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
+    <div class="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
         <div class="flex items-center justify-between mb-4">
             <h3 class="text-base font-semibold text-gray-900 dark:text-white">Nuevo Pendiente de Cliente</h3>
             <button onclick="document.getElementById('modal-nuevo-pendiente').classList.add('hidden')" class="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200">✕</button>
         </div>
-        <form method="POST" action="{{ route('pendientes.store') }}">
+        <form id="form-nuevo-pendiente" method="POST" action="{{ route('pendientes.store') }}" enctype="multipart/form-data">
             @csrf
             <input type="hidden" name="type" value="cliente">
+            <input type="hidden" name="description" id="pending-description-hidden">
             <div class="space-y-3">
                 <div>
                     <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Proyecto *</label>
@@ -218,13 +219,27 @@
                     </select>
                 </div>
                 <div>
+                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Tarea asociada (opcional)</label>
+                    <select name="task_id" class="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500/20">
+                        <option value="">Sin tarea específica</option>
+                        @foreach($tasks as $task)
+                            <option value="{{ $task->id }}">{{ $task->title }} — {{ $task->project->project_name ?? '' }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
                     <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Descripción del requerimiento *</label>
-                    <textarea name="description" required rows="3" placeholder="Ej: Faltan credenciales del servidor..." class="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500/20 resize-none"></textarea>
+                    <div id="pending-description-editor"
+                         contenteditable="true"
+                         data-placeholder="Ej: Faltan credenciales del servidor... (puedes pegar imágenes aqui)"
+                         class="w-full min-h-[100px] px-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500/20"
+                         style="word-break:break-word;"></div>
+                    <p class="text-xs text-gray-400 mt-1">Puedes pegar imágenes directamente (Ctrl+V) 🖼️</p>
                 </div>
             </div>
             <div class="flex items-center justify-end gap-2 mt-4">
                 <button type="button" onclick="document.getElementById('modal-nuevo-pendiente').classList.add('hidden')" class="px-4 py-2 text-sm font-medium text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">Cancelar</button>
-                <button type="submit" class="px-4 py-2 text-sm font-medium bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors">Crear Pendiente</button>
+                <button type="submit" onclick="syncPendingDescription()" class="px-4 py-2 text-sm font-medium bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors">Crear Pendiente</button>
             </div>
         </form>
     </div>
@@ -241,7 +256,55 @@
     function closeResolveModal() {
         document.getElementById('modal-resolver-pendiente').classList.add('hidden');
     }
-    
+
+    // ─── Contenteditable placeholder ─────────────────────────────────────────────
+    const editor = document.getElementById('pending-description-editor');
+    if (editor) {
+        const placeholder = editor.getAttribute('data-placeholder');
+        if (!editor.textContent.trim()) editor.setAttribute('data-empty', 'true');
+
+        editor.addEventListener('input', () => {
+            editor.setAttribute('data-empty', editor.textContent.trim() === '' ? 'true' : 'false');
+        });
+        editor.addEventListener('focus', () => {
+            if (editor.getAttribute('data-empty') === 'true') editor.removeAttribute('data-empty');
+        });
+        editor.addEventListener('blur', () => {
+            if (!editor.textContent.trim() && !editor.querySelector('img')) {
+                editor.setAttribute('data-empty', 'true');
+            }
+        });
+
+        // ─── Image paste support ─────────────────────────────────────────────────
+        editor.addEventListener('paste', function(e) {
+            const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+            for (const item of items) {
+                if (item.type.indexOf('image') !== -1) {
+                    e.preventDefault();
+                    const blob = item.getAsFile();
+                    const reader = new FileReader();
+                    reader.onload = function(ev) {
+                        const img = document.createElement('img');
+                        img.src = ev.target.result;
+                        img.style.cssText = 'max-width:100%;border-radius:8px;margin:4px 0;';
+                        editor.appendChild(img);
+                        editor.setAttribute('data-empty', 'false');
+                    };
+                    reader.readAsDataURL(blob);
+                }
+            }
+        });
+    }
+
+    function syncPendingDescription() {
+        const ed = document.getElementById('pending-description-editor');
+        const hid = document.getElementById('pending-description-hidden');
+        if (ed && hid) {
+            hid.value = ed.innerHTML;
+        }
+    }
+
+    // Real-time search on client pending table
     document.addEventListener('DOMContentLoaded', () => {
         const searchInput = document.getElementById('realtime-client-search');
         if (searchInput) {
@@ -259,4 +322,15 @@
         }
     });
 </script>
+<style>
+#pending-description-editor[data-empty="true"]::before {
+    content: attr(data-placeholder);
+    color: #9ca3af;
+    pointer-events: none;
+    position: absolute;
+}
+#pending-description-editor {
+    position: relative;
+}
+</style>
 @endpush

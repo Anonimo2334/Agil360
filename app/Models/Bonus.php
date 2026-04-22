@@ -15,6 +15,7 @@ class Bonus extends Model
         'amount',
         'status',
         'reason',
+        'rejection_reason',
         'approved_by',
         'approved_at',
     ];

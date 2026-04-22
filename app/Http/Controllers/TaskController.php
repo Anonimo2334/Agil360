@@ -47,30 +47,51 @@ class TaskController extends Controller
             'status'               => 'required|in:pendiente,en_progreso,completada,bloqueada',
             'start_date'           => 'nullable|date',
             'due_date'             => 'nullable|date',
-            'progress'             => 'integer|min:0|max:100',
+            'progress'             => 'nullable|integer|min:0|max:100',
         ]);
+
+        // Auto-set progress to 100 when creating as completed
+        if (isset($validated['status']) && $validated['status'] === 'completada') {
+            $validated['progress'] = 100;
+        }
 
         $task = Task::create($validated);
 
         return redirect()->back()->with('success', 'Tarea creada exitosamente.');
     }
 
+    /**
+     * Search suggestions for live autocomplete
+     */
+    public function suggestions(Request $request)
+    {
+        $q = $request->get('q', '');
+        $tasks = Task::with('project')
+            ->where('title', 'like', "%{$q}%")
+            ->limit(8)
+            ->get(['id', 'title', 'status', 'project_id']);
+
+        return response()->json($tasks->map(fn($t) => [
+            'id'           => $t->id,
+            'title'        => $t->title,
+            'status'       => $t->status,
+            'project_name' => $t->project->project_name ?? '—',
+        ]));
+    }
+
     public function update(Request $request, Task $task)
     {
-        // Completed tasks are locked — only allow editing non-status fields
-        if ($task->status === 'completada') {
-            return redirect()->back()->with('error', 'Las tareas completadas no se pueden modificar.');
-        }
-
         $validated = $request->validate([
             'title'                => 'required|string|max:255',
             'description'          => 'nullable|string',
+            'documentation'        => 'nullable|string',
             'assigned_engineer_id' => 'nullable|exists:users,id',
             'priority'             => 'required|in:baja,media,alta,critica',
             'status'               => 'required|in:pendiente,en_progreso,completada,bloqueada',
             'start_date'           => 'nullable|date',
             'due_date'             => 'nullable|date',
-            'progress'             => 'integer|min:0|max:100',
+            'progress'             => 'nullable|integer|min:0|max:100',
+            'project_id'           => 'nullable|exists:projects,id',
         ]);
 
         // If marking as complete, force progress to 100
@@ -82,22 +103,26 @@ class TaskController extends Controller
 
         // Recalculate project progress based on tasks
         $project = $task->project;
-        $avgProgress = Task::where('project_id', $project->id)->avg('progress');
-        $project->update(['progress_percentage' => (int) round($avgProgress ?? 0)]);
+        if ($project) {
+            $avgProgress = Task::where('project_id', $project->id)->avg('progress');
+            $project->update(['progress_percentage' => (int) round($avgProgress ?? 0)]);
+        }
 
         return redirect()->back()->with('success', 'Tarea actualizada.');
     }
 
+    /**
+     * Save documentation/notes for a task (AJAX)
+     */
+    public function document(Request $request, Task $task)
+    {
+        $request->validate(['documentation' => 'nullable|string']);
+        $task->update(['documentation' => $request->documentation]);
+        return response()->json(['success' => true]);
+    }
+
     public function updateStatus(Request $request, Task $task)
     {
-        // Completed tasks are permanently locked — cannot be moved to another status
-        if ($task->status === 'completada') {
-            return response()->json([
-                'success' => false,
-                'locked'  => true,
-                'message' => 'Las tareas completadas no pueden cambiar de estado.',
-            ], 403);
-        }
 
         $validated = $request->validate([
             'status' => 'required|in:pendiente,en_progreso,completada,bloqueada',

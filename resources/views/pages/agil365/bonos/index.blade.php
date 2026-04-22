@@ -14,6 +14,12 @@
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Bonos por Cumplimiento</h1>
         <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Sistema automático de bonos para ingenieros por proyectos completados a tiempo</p>
     </div>
+    @if(auth()->user()->isAdmin() || auth()->user()->hasAnyRole(['contabilidad']))
+    <button onclick="document.getElementById('modal-nuevo-bono').classList.remove('hidden')" class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Registrar Bono Manual
+    </button>
+    @endif
 </div>
 
 {{-- Summary --}}
@@ -157,7 +163,7 @@
                                         @csrf @method('PATCH')
                                         <button type="submit" class="px-2 py-1 text-xs font-medium text-brand-600 bg-brand-50 rounded hover:bg-brand-100 transition-colors dark:bg-brand-500/10 dark:hover:bg-brand-500/20">Aprobar</button>
                                     </form>
-                                    <form method="POST" action="{{ route('bonos.reject', $b) }}" onsubmit="return confirm('¿Rechazar este bono?')">
+                                    <form method="POST" action="{{ route('bonos.reject', $b) }}" onsubmit="return confirm('\u00bfRechazar este bono?')">
                                         @csrf @method('PATCH')
                                         <button type="submit" class="px-2 py-1 text-xs font-medium text-error-600 bg-error-50 rounded hover:bg-error-100 transition-colors dark:bg-error-500/10 dark:hover:bg-error-500/20">Rechazar</button>
                                     </form>
@@ -166,6 +172,8 @@
                                         @csrf @method('PATCH')
                                         <button type="submit" class="px-2 py-1 text-xs font-medium text-success-600 bg-success-50 rounded hover:bg-success-100 transition-colors dark:bg-success-500/10 dark:hover:bg-success-500/20">Marcar Pagado</button>
                                     </form>
+                                    @elseif($b->status === 'rechazado' && $b->rejection_reason)
+                                    <span class="text-xs text-error-500 italic max-w-[120px] truncate" title="{{ $b->rejection_reason }}">{{ $b->rejection_reason }}</span>
                                     @endif
                                 </div>
                             </td>
@@ -214,4 +222,43 @@
         </div>
     </div>
 </div>
+
+@push('modals')
+{{-- MODAL: Nuevo Bono Manual --}}
+<div id="modal-nuevo-bono" class="hidden fixed inset-0 z-[999999] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="document.getElementById('modal-nuevo-bono').classList.add('hidden')"></div>
+    <div class="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-base font-semibold text-gray-900 dark:text-white">🏆 Registrar Bono Manual</h3>
+            <button onclick="document.getElementById('modal-nuevo-bono').classList.add('hidden')" class="p-1 text-gray-400 hover:text-gray-600">✕</button>
+        </div>
+        <form method="POST" action="{{ route('bonos.store') }}">
+            @csrf
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Ingeniero *</label>
+                    <select name="engineer_id" required class="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 focus:outline-none">
+                        <option value="">Seleccionar...</option>
+                        @foreach($engineers as $eng)
+                            <option value="{{ $eng->id }}">{{ $eng->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Monto (USD) *</label>
+                    <input type="number" name="amount" min="1" step="0.01" required placeholder="50.00" class="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Razón / Descripción *</label>
+                    <textarea name="reason" required rows="3" placeholder="Ej: Bono por desempeño excepcional..." class="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-gray-50 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-300 focus:outline-none resize-none"></textarea>
+                </div>
+            </div>
+            <div class="flex items-center justify-end gap-2 mt-4">
+                <button type="button" onclick="document.getElementById('modal-nuevo-bono').classList.add('hidden')" class="px-4 py-2 text-sm font-medium text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50">Cancelar</button>
+                <button type="submit" class="px-4 py-2 text-sm font-medium bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors">Registrar Bono</button>
+            </div>
+        </form>
+    </div>
+</div>
+@endpush
 @endsection

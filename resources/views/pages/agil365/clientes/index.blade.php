@@ -14,16 +14,22 @@
         <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Clientes</h1>
         <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Gestión de empresas y cuentas activas</p>
     </div>
-    <a href="{{ route('clientes.create') }}" class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors">
-        <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-        Nuevo Cliente
-    </a>
+    <div class="flex items-center gap-2">
+        <button onclick="document.getElementById('modal-import-csv').classList.remove('hidden')" class="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800 transition-colors">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Importar CSV
+        </button>
+        <a href="{{ route('clientes.create') }}" class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            Nuevo Cliente
+        </a>
+    </div>
 </div>
 
 {{-- Search & Filter --}}
-<form method="GET" action="{{ route('clientes') }}" class="mb-5 flex flex-wrap items-center gap-3">
+<form method="GET" action="{{ route('clientes') }}" class="mb-5 flex flex-wrap items-center gap-3" id="clients-filter-form">
     <div class="relative flex-1 min-w-[200px] max-w-xs">
-        <input type="text" name="search" value="{{ request('search') }}" placeholder="Buscar cliente..." class="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-white dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500/20" onchange="this.form.submit()">
+        <input type="text" name="search" value="{{ request('search') }}" placeholder="Buscar cliente..." id="clients-search" class="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-white dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300 focus:outline-none focus:ring-2 focus:ring-brand-500/20" oninput="realtimeClientSearch(this.value)">
         <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" width="14" height="14" fill="none" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
     </div>
     <select name="status" class="px-3 py-2.5 text-sm border border-gray-200 rounded-xl bg-white dark:bg-gray-900 dark:border-gray-700 dark:text-gray-300 focus:outline-none" onchange="this.form.submit()">
@@ -46,7 +52,7 @@
         $colors = ['bg-brand-500','bg-purple-500','bg-success-500','bg-warning-500','bg-error-500','bg-blue-light-500'];
         $ci = abs(crc32($client->name)) % count($colors);
     @endphp
-    <div class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900 hover:shadow-theme-md transition-all group">
+    <div class="rounded-2xl border border-gray-200 bg-white p-5 dark:border-gray-800 dark:bg-gray-900 hover:shadow-theme-md transition-all group client-card" data-name="{{ strtolower($client->name) }}">
         {{-- Header --}}
         <div class="flex items-start justify-between mb-4">
             <div class="flex items-center gap-3">
@@ -137,4 +143,45 @@
 @if(isset($companies) && method_exists($companies, 'links') && $companies->hasPages())
 <div class="mt-6 flex justify-center">{{ $companies->links() }}</div>
 @endif
+
+@push('modals')
+{{-- MODAL: Import CSV --}}
+<div id="modal-import-csv" class="hidden fixed inset-0 z-[999999] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" onclick="document.getElementById('modal-import-csv').classList.add('hidden')"></div>
+    <div class="relative bg-white dark:bg-gray-900 rounded-2xl shadow-2xl w-full max-w-md p-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-base font-semibold text-gray-900 dark:text-white">Importar Clientes CSV</h3>
+            <button onclick="document.getElementById('modal-import-csv').classList.add('hidden')" class="p-1 text-gray-400 hover:text-gray-600">✕</button>
+        </div>
+        <div class="mb-4 p-3 bg-brand-50 dark:bg-brand-500/10 rounded-xl text-xs text-brand-700 dark:text-brand-300">
+            <p class="font-semibold mb-1">Formato esperado del CSV:</p>
+            <code class="block">Nombre,Contacto,Email,Telefono,Pais</code>
+            <p class="mt-1 text-brand-600">La primera fila debe ser el encabezado.</p>
+        </div>
+        <form method="POST" action="{{ route('clientes.import') }}" enctype="multipart/form-data">
+            @csrf
+            <div class="mb-4">
+                <label class="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1.5">Archivo CSV *</label>
+                <input type="file" name="csv_file" accept=".csv,.txt" required class="w-full text-sm text-gray-700 dark:text-gray-300 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-brand-50 file:text-brand-600 hover:file:bg-brand-100 dark:file:bg-brand-500/10 dark:file:text-brand-400">
+            </div>
+            <div class="flex items-center justify-end gap-2">
+                <button type="button" onclick="document.getElementById('modal-import-csv').classList.add('hidden')" class="px-4 py-2 text-sm font-medium text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50">Cancelar</button>
+                <button type="submit" class="px-4 py-2 text-sm font-medium bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors">Importar</button>
+            </div>
+        </form>
+    </div>
+</div>
+@endpush
+
+@push('scripts')
+<script>
+function realtimeClientSearch(val) {
+    val = val.toLowerCase();
+    document.querySelectorAll('.client-card').forEach(card => {
+        const name = card.getAttribute('data-name') || '';
+        card.style.display = name.includes(val) ? '' : 'none';
+    });
+}
+</script>
+@endpush
 @endsection

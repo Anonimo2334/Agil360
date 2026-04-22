@@ -62,6 +62,15 @@ Route::middleware('auth')->group(function () {
     Route::delete('/clientes/{company}', [CompanyController::class, 'destroy'])
         ->name('clientes.destroy')
         ->middleware('permission:clientes.eliminar');
+    // API: quick create company from project form
+    Route::post('/api/clientes/rapido', [CompanyController::class, 'quickCreate'])
+        ->name('clientes.quick_create')
+        ->middleware('permission:clientes.crear');
+    Route::get('/api/clientes/buscar', [CompanyController::class, 'search'])
+        ->name('clientes.search');
+    Route::post('/clientes/importar-csv', [CompanyController::class, 'importCsv'])
+        ->name('clientes.import')
+        ->middleware('permission:clientes.crear');
 
     // ─── Proyectos ─────────────────────────────────────────────────────────────
     Route::get('/proyectos', [ProjectController::class, 'index'])
@@ -117,6 +126,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/tareas/{task}/actualizar-fecha', [TaskController::class, 'updateDate'])
         ->name('tareas.update_date')
         ->middleware('permission:tareas.editar');
+    Route::post('/tareas/{task}/documentar', [TaskController::class, 'document'])
+        ->name('tareas.document')
+        ->middleware('permission:tareas.editar');
+    Route::get('/api/tareas/sugerencias', [TaskController::class, 'suggestions'])
+        ->name('tareas.suggestions');
 
     // ─── Pendientes ────────────────────────────────────────────────────────────
     // Ruta genérica que redirige según el rol
@@ -171,19 +185,22 @@ Route::middleware('auth')->group(function () {
         ->middleware('permission:tareas.editar');
 
     // ─── Bonos ─────────────────────────────────────────────────────────────────
-    // Solo admin y gerente pueden ver/gestionar bonos
+    // Contabilidad también puede ver/gestionar bonos
     Route::get('/bonos', [BonusController::class, 'index'])
         ->name('bonos')
-        ->middleware('role:super_admin,admin,gerente');
+        ->middleware('role:super_admin,admin,gerente,contabilidad');
     Route::patch('/bonos/{bonus}/aprobar', [BonusController::class, 'approve'])
         ->name('bonos.approve')
-        ->middleware('role:super_admin,admin');
+        ->middleware('role:super_admin,admin,contabilidad');
     Route::patch('/bonos/{bonus}/pagar', [BonusController::class, 'markPaid'])
         ->name('bonos.paid')
-        ->middleware('role:super_admin,admin');
+        ->middleware('role:super_admin,admin,contabilidad');
     Route::patch('/bonos/{bonus}/rechazar', [BonusController::class, 'reject'])
         ->name('bonos.reject')
-        ->middleware('role:super_admin,admin');
+        ->middleware('role:super_admin,admin,contabilidad');
+    Route::post('/bonos', [BonusController::class, 'store'])
+        ->name('bonos.store')
+        ->middleware('role:super_admin,admin,contabilidad');
 
     // ─── Alertas ───────────────────────────────────────────────────────────────
     Route::get('/alertas', [AlertController::class, 'index'])

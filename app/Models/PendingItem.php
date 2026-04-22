@@ -9,11 +9,16 @@ class PendingItem extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['project_id', 'type', 'description', 'status', 'assigned_to', 'resolution_note'];
+    protected $fillable = ['project_id', 'task_id', 'type', 'description', 'status', 'assigned_to', 'resolution_note'];
 
     public function project()
     {
         return $this->belongsTo(Project::class);
+    }
+
+    public function task()
+    {
+        return $this->belongsTo(Task::class);
     }
 
     public function assignedUser()

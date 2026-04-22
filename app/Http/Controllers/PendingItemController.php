@@ -20,8 +20,9 @@ class PendingItemController extends Controller
 
         $pending  = $query->orderByDesc('created_at')->paginate(20)->withQueryString();
         $projects = Project::whereNotIn('status', ['completado', 'cancelado'])->orderBy('project_name')->get();
+        $tasks    = \App\Models\Task::with('project')->whereNotIn('status', ['completada'])->orderBy('title')->get();
 
-        return view('pages.agil365.pendientes.cliente', compact('pending', 'projects'), ['title' => 'Pendientes por Cliente']);
+        return view('pages.agil365.pendientes.cliente', compact('pending', 'projects', 'tasks'), ['title' => 'Pendientes por Cliente']);
     }
 
     public function byEngineer(Request $request)
@@ -58,9 +59,10 @@ class PendingItemController extends Controller
             'type'        => 'required|in:cliente,ingeniero',
             'description' => 'required|string',
             'assigned_to' => 'nullable|exists:users,id',
+            'task_id'     => 'nullable|exists:tasks,id',
         ]);
 
-        PendingItem::create($request->only('project_id', 'type', 'description', 'assigned_to') + ['status' => 'pendiente']);
+        PendingItem::create($request->only('project_id', 'type', 'description', 'assigned_to', 'task_id') + ['status' => 'pendiente']);
 
         return redirect()->back()->with('success', 'Pendiente registrado.');
     }

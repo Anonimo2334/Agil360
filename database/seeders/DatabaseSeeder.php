@@ -25,15 +25,17 @@ class DatabaseSeeder extends Seeder
             ['name' => 'Ingeniero',           'slug' => 'ingeniero',    'description' => 'Desarrollador / Técnico','permissions' => ['proyectos.ver', 'tareas.ver', 'tareas.crear', 'tareas.editar']],
             ['name' => 'Soporte',             'slug' => 'soporte',      'description' => 'Soporte técnico',        'permissions' => ['clientes.ver', 'proyectos.ver', 'tareas.ver', 'tareas.crear', 'tareas.editar']],
             ['name' => 'Visualizador',        'slug' => 'visualizador', 'description' => 'Solo lectura',           'permissions' => ['clientes.ver', 'proyectos.ver', 'tareas.ver', 'reportes.ver']],
+            ['name' => 'Contabilidad',        'slug' => 'contabilidad', 'description' => 'Gestión de bonos y finanzas', 'permissions' => ['reportes.ver']],
         ];
         foreach ($roles as $role) {
             Role::updateOrCreate(['slug' => $role['slug']], $role);
         }
 
-        $adminRole     = Role::where('slug', 'admin')->first();
-        $ingRole       = Role::where('slug', 'ingeniero')->first();
-        $soporteRole   = Role::where('slug', 'soporte')->first();
-        $superRole     = Role::where('slug', 'super_admin')->first();
+        $adminRole       = Role::where('slug', 'admin')->first();
+        $ingRole         = Role::where('slug', 'ingeniero')->first();
+        $soporteRole     = Role::where('slug', 'soporte')->first();
+        $superRole       = Role::where('slug', 'super_admin')->first();
+        $contabilidadRole = Role::where('slug', 'contabilidad')->first();
 
         // ── Users ─────────────────────────────────────────────────────────────
         $admin = User::firstOrCreate(['email' => 'admin@agil365.com'], [
@@ -41,6 +43,15 @@ class DatabaseSeeder extends Seeder
             'password'   => Hash::make('password'),
             'role_id'    => $superRole->id,
             'department' => 'Administración',
+            'is_active'  => true,
+        ]);
+
+        // Default accounting user
+        User::firstOrCreate(['email' => 'contabilidad@agil365.com'], [
+            'name'       => 'Contabilidad',
+            'password'   => Hash::make('password'),
+            'role_id'    => $contabilidadRole->id,
+            'department' => 'Contabilidad',
             'is_active'  => true,
         ]);
 

@@ -26,6 +26,9 @@ Route::middleware('auth')->group(function () {
 
     // Dashboard — todos los autenticados pueden verlo
     Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+    Route::view('/requerimientos-ia', 'pages.agil365.requerimientos-ia')
+        ->name('requerimientos.ia')
+        ->middleware('permission:proyectos.ver');
 
     // ─── Mi Perfil & Ajustes ──────────────────────────────────────────────────
     Route::get('/perfil', [App\Http\Controllers\ProfileController::class, 'index'])->name('profile.index');
